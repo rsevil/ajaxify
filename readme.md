@@ -18,6 +18,14 @@ Ajaxify your entire website instantly with this simple drop-in script using the 
 <script defer src="//raw.github.com/browserstate/ajaxify/master/ajaxify-html5.js"></script>  
 ```
 
+## Usage
+
+In JavaScript, call the plugin on an element containing links that you'd like to ajaxify.
+
+``` javascript
+$('body').ajaxify();
+```
+
 ## Bookmarklet
 
 ``` javascript
