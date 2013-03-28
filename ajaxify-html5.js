@@ -7,7 +7,8 @@
 		var
 			History = window.History,
 			$ = window.jQuery,
-			document = window.document;
+			document = window.document,
+			$ajaxifyTarget = this; // The element on which Ajaxify was called. Any links in this element will trigger an AJAX load.
 
 		// Check to see if History.js is enabled for our Browser
 		if ( !History.enabled ) {
@@ -16,7 +17,7 @@
 
 		// Wait for Document
 		$(function(){
-			// Prepare Variables
+			// Settings
 			var settings = $.extend( {
 				contentSelector : '#content,article:first,.article:first,.post:first',
 				$menu : $('#menu,#nav,nav:first,.nav:first').filter(':first'),
@@ -29,8 +30,7 @@
 					easing:'swing'
 				},
 			});
-
-			// Generic variables
+			// Prepare internal variables
 			var $content = $(settings.contentSelector).filter(':first'),
 			contentNode = $content.get(0),
 			$window = $(window),
@@ -97,7 +97,7 @@
 			};
 			
 			// Ajaxify our Internal Links
-			$body.ajaxifyHelper();
+			$ajaxifyTarget.ajaxifyHelper();
 			
 			// Hook into State Changes
 			$window.bind('statechange',function(){
