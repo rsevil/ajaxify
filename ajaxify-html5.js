@@ -20,7 +20,7 @@
 			// Settings
 			var settings = $.extend( {
 				contentSelector : '#content,article:first,.article:first,.post:first',
-				$menu : $('#menu,#nav,nav:first,.nav:first').filter(':first'),
+				menuSelector : '#menu,#nav,nav:first,.nav:first',
 				activeClass : 'active selected current youarehere',
 				activeSelector : '.active,.selected,.current,.youarehere',
 				menuChildrenSelector : '> li,> ul > li',
@@ -33,6 +33,7 @@
 			// Prepare internal variables
 			var $content = $(settings.contentSelector).filter(':first'),
 			contentNode = $content.get(0),
+			$menu = $(settings.menuSelector),
 			$window = $(window),
 			$body = $(document.body),
 			rootUrl = History.getRootUrl();
@@ -140,7 +141,7 @@
 						}
 						
 						// Update the menu
-						$menuChildren = settings.$menu.find(settings.menuChildrenSelector);
+						$menuChildren = $menu.find(settings.menuChildrenSelector);
 						$menuChildren.filter(settings.activeSelector).removeClass(settings.activeClass);
 						$menuChildren = $menuChildren.has('a[href^="'+relativeUrl+'"],a[href^="/'+relativeUrl+'"],a[href^="'+url+'"]');
 						if ( $menuChildren.length === 1 ) { $menuChildren.addClass(settings.activeClass); }
