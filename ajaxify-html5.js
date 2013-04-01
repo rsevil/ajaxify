@@ -19,8 +19,7 @@
 		// Settings
 		var settings = $.extend( {
 			contentSelector : 'main,#main,#content,article:first,.article:first,.post:first',
-			// TODO: .selector is deprecated. We should find an alternative.
-			linkSelector : $ajaxifyTarget.selector,
+			linkSelector : '',
 			menuSelector : '#menu,#nav,nav:first,.nav:first',
 			activeClass : 'active selected current youarehere',
 			activeSelector : '.active,.selected,.current,.youarehere',
@@ -31,17 +30,21 @@
 				easing:'swing'
 			}
 		}, options);
-		// Prepare internal variables
-		var $content = $(settings.contentSelector).filter(':first');
-		// Ensure Content
-		if ( $content.length === 0 ) {
-			$content = $body;
+		if (settings.linkSelector === '') {
+			settings.linkSelector = settings.contentSelector;
 		}
-		var contentNode = $content.get(0),
+		// Prepare internal variables
+		var $content = $(settings.contentSelector).filter(':first'),
+		contentNode = $content.get(0),
 		$menu = $(settings.menuSelector),
 		$window = $(window),
 		$body = $(document.body),
 		rootUrl = History.getRootUrl();
+
+		// Ensure Content
+		if ( $content.length === 0 ) {
+			$content = $body;
+		}
 
 		// Internal Helper
 		$.expr[':'].internal = function(obj, index, meta, stack){
@@ -147,7 +150,7 @@
 
 					// Update the content
 					$content.stop(true,true);
-					$content.html(contentHtml).filter('settings.linkSelector').ajaxifyHelper();
+					$content.html(contentHtml).filter(settings.linkSelector).ajaxifyHelper();
 					$content.css('opacity',100).show(); /* you could fade in here if you'd like */
 
 					// Update the title
