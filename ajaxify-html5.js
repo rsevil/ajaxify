@@ -82,13 +82,19 @@
 				var
 					$links = $(this),
 					url = $links.attr('href'),
-					title = $links.attr('title')||null;
+					title = $links.attr('title')||null,
+					stateData = { 
+						ajaxifySettings : {
+							'linkContainerSelector' : settings.linkContainerSelector,
+							'contentSelector' : settings.contentSelector
+						}
+					}
 
 				// Continue as normal for cmd clicks etc
 				if ( event.which == 2 || event.metaKey ) { return true; }
 				// Ajaxify this link
-				loadPage(url);
-				History.pushState(null,title,url);
+
+				History.pushState(stateData,title,url);
 				event.preventDefault();
 				return false;
 			});
@@ -100,8 +106,27 @@
 		setupLinks($(settings.linkContainerSelector).first());
 
 		// Hook into State Changes
-		function loadPage( url ) {
-			alert(settings.contentSelector);
+		$window.bind('statechange',function(){
+			var State = History.getState(),
+				stateData = State.data,
+				url = State.url,
+				tContentSelector, // Transition link selector - local variable just for the transition
+				tLinkContainerSelector; // Transition container selector - local variable just for the container
+				relativeUrl = url.replace(rootUrl,'');
+			/* If possible, retreive the settings that were set when the link was clicked. This is
+			important because Ajaxify might be called multiple times.
+			We might be transitioning to this state or from this state - we don't know which. */
+			if (stateData.ajaxifySettings) {
+				tContentSelector = stateData.ajaxifySettings.contentSelector;
+				tLinkContainerSelector = stateData.ajaxifySettings.linkContainerSelector;
+			} else {
+				// We must not have arrived to this page via Ajaxify. Maybe this is the first page on the site that the user visited.
+				tContentSelector = settings.contentSelector;
+				tLinkContainerSelector = settings.linkContainerSelector;
+			}
+
+			// Start loading via AJAX
+
 			// Prepare Variables
 			var relativeUrl = url.replace(rootUrl,'');
 				//State = History.getState(),
@@ -123,7 +148,7 @@
 					var
 						$data = $(documentHtml(data)),
 						$dataBody = $data.find('.document-body:first'),
-						$dataContent = $dataBody.find(settings.contentSelector).filter(':first'),
+						$dataContent = $dataBody.find(tContentSelector).filter(':first'),
 						$menuChildren, contentHtml, $scripts;
 
 					// Fetch the scripts
@@ -148,7 +173,7 @@
 					// Update the content
 					$content.stop(true,true);
 					$content.html(contentHtml);
-					setupLinks($content.filter(settings.linkContainerSelector).first());
+					setupLinks($content.filter(tLinkContainerSelector).first());
 					$content.css('opacity',100).show(); /* you could fade in here if you'd like */
 
 					// Update the title
@@ -187,6 +212,9 @@
 				}
 			}); // end ajax
 
-		}; // end loadPage(url)
+		});
+
+		
+
 	}; // end $.fn.ajaxify
 })( jQuery ); // end closure
