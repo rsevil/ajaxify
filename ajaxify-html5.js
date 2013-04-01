@@ -29,7 +29,7 @@
 					duration: 800,
 					easing:'swing'
 				},
-			});
+			}, options);
 			// Prepare internal variables
 			var $content = $(settings.contentSelector).filter(':first'),
 			contentNode = $content.get(0),
