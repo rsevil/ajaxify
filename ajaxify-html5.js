@@ -87,7 +87,7 @@
 				// Continue as normal for cmd clicks etc
 				if ( event.which == 2 || event.metaKey ) { return true; }
 				// Ajaxify this link
-				//loadPage(url);
+				loadPage(url);
 				History.pushState(null,title,url);
 				event.preventDefault();
 				return false;
@@ -100,12 +100,12 @@
 		setupLinks($(settings.linkContainerSelector).first());
 
 		// Hook into State Changes
-		$window.bind('statechange',function(){
+		function loadPage( url ) {
+			alert(settings.contentSelector);
 			// Prepare Variables
-			var
-				State = History.getState(),
-				url = State.url,
-				relativeUrl = url.replace(rootUrl,'');
+			var relativeUrl = url.replace(rootUrl,'');
+				//State = History.getState(),
+				//url = State.url,
 
 			// Set Loading
 			$body.addClass('loading');
@@ -187,6 +187,6 @@
 				}
 			}); // end ajax
 
-		}); // end onStateChange
+		}; // end loadPage(url)
 	}; // end $.fn.ajaxify
 })( jQuery ); // end closure
