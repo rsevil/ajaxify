@@ -15,9 +15,11 @@
 			return false;
 		}
 
+		console.log($ajaxifyTarget);
+
 		// Settings
 		var settings = $.extend( {
-			contentSelector : '',
+			contentSelector : 'main,#main,#content,article:first,.article:first,.post:first',
 			menuSelector : '#menu,#nav,nav:first,.nav:first',
 			activeClass : 'active selected current youarehere',
 			activeSelector : '.active,.selected,.current,.youarehere',
@@ -29,22 +31,16 @@
 			}
 		}, options);
 		// Prepare internal variables
-		var $content;
-		if (settings.contentSelector !== '') {
-			$content = $(settings.contentSelector).filter(':first');
-		} else {
-			$content = $ajaxifyTarget.filter(':first');
+		var $content = $(settings.contentSelector).filter(':first');
+		// Ensure Content
+		if ( $content.length === 0 ) {
+			$content = $body;
 		}
 		var contentNode = $content.get(0),
 		$menu = $(settings.menuSelector),
 		$window = $(window),
 		$body = $(document.body),
 		rootUrl = History.getRootUrl();
-
-		// Ensure Content
-		if ( $content.length === 0 ) {
-			$content = $body;
-		}
 
 		// Internal Helper
 		$.expr[':'].internal = function(obj, index, meta, stack){
@@ -89,7 +85,7 @@
 
 				// Continue as normal for cmd clicks etc
 				if ( event.which == 2 || event.metaKey ) { return true; }
-
+				console.log('ouch!');
 				// Ajaxify this link
 				History.pushState(null,title,url);
 				event.preventDefault();
