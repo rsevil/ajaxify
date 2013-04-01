@@ -26,7 +26,7 @@
 			scrollOptions : {
 				duration: 800,
 				easing:'swing'
-			},
+			}
 		}, options);
 		// Prepare internal variables
 		var $content;
@@ -35,8 +35,6 @@
 		} else {
 			$content = $ajaxifyTarget.filter(':first');
 		}
-
-		
 		var contentNode = $content.get(0),
 		$menu = $(settings.menuSelector),
 		$window = $(window),
@@ -47,7 +45,7 @@
 		if ( $content.length === 0 ) {
 			$content = $body;
 		}
-		
+
 		// Internal Helper
 		$.expr[':'].internal = function(obj, index, meta, stack){
 			// Prepare
@@ -55,14 +53,14 @@
 				$this = $(obj),
 				url = $this.attr('href')||'',
 				isInternalLink;
-			
+
 			// Check link
 			isInternalLink = url.substring(0,rootUrl.length) === rootUrl || url.indexOf(':') === -1;
-			
+
 			// Ignore or Keep
 			return isInternalLink;
 		};
-		
+
 		// HTML Helper
 		var documentHtml = function(html){
 			// Prepare
@@ -71,16 +69,16 @@
 				.replace(/<(html|head|body|title|meta|script)([\s\>])/gi,'<div class="document-$1"$2')
 				.replace(/<\/(html|head|body|title|meta|script)\>/gi,'</div>')
 			;
-			
+
 			// Return
 			return result;
 		};
-		
+
 		// Ajaxify Helper
 		$.fn.ajaxifyHelper = function(){
 			// Prepare
 			var $this = $(this);
-			
+
 			// Ajaxify
 			$this.find('a:internal:not(.no-ajaxy)').click(function(event){
 				// Prepare
@@ -88,23 +86,23 @@
 					$this = $(this),
 					url = $this.attr('href'),
 					title = $this.attr('title')||null;
-				
+
 				// Continue as normal for cmd clicks etc
 				if ( event.which == 2 || event.metaKey ) { return true; }
-				
+
 				// Ajaxify this link
 				History.pushState(null,title,url);
 				event.preventDefault();
 				return false;
 			});
-			
+
 			// Chain
 			return $this;
 		};
-		
+
 		// Ajaxify our Internal Links
 		$ajaxifyTarget.ajaxifyHelper();
-		
+
 		// Hook into State Changes
 		$window.bind('statechange',function(){
 			// Prepare Variables
@@ -120,7 +118,7 @@
 			// Animating to opacity to 0 still keeps the element's height intact
 			// Which prevents that annoying pop bang issue when loading in new content
 			$content.animate({opacity:0},800);
-			
+
 			// Ajax Request the Traditional Page
 			$.ajax({
 				url: url,
@@ -131,7 +129,7 @@
 						$dataBody = $data.find('.document-body:first'),
 						$dataContent = $dataBody.find(settings.contentSelector).filter(':first'),
 						$menuChildren, contentHtml, $scripts;
-					
+
 					// Fetch the scripts
 					$scripts = $dataContent.find('.document-script');
 					if ( $scripts.length ) {
@@ -144,7 +142,7 @@
 						document.location.href = url;
 						return false;
 					}
-					
+
 					// Update the menu
 					$menuChildren = $menu.find(settings.menuChildrenSelector);
 					$menuChildren.filter(settings.activeSelector).removeClass(settings.activeClass);
@@ -161,7 +159,7 @@
 						document.getElementsByTagName('title')[0].innerHTML = document.title.replace('<','&lt;').replace('>','&gt;').replace(' & ',' &amp; ');
 					}
 					catch ( Exception ) { }
-					
+
 					// Add the scripts
 					$scripts.each(function(){
 						var $script = $(this), scriptText = $script.text(), scriptNode = document.createElement('script');
@@ -173,7 +171,7 @@
 					if ( $body.ScrollTo||false ) { $body.ScrollTo(settings.scrollOptions); } /* http://balupton.com/projects/jquery-scrollto */
 					$body.removeClass('loading');
 					$window.trigger(settings.completedEventName);
-	
+
 					// Inform Google Analytics of the change
 					if ( typeof window._gaq !== 'undefined' ) {
 						window._gaq.push(['_trackPageview', relativeUrl]);
@@ -192,6 +190,5 @@
 			}); // end ajax
 
 		}); // end onStateChange
-
-	};
+	}; // end $.fn.ajaxify
 })( jQuery ); // end closure
