@@ -75,17 +75,14 @@
 		};
 
 		// Ajaxify Helper
-		$.fn.ajaxifyHelper = function(){
-			// Prepare
-			var $this = $(this);
-
+		function setupLinks($links){
 			// Ajaxify
-			$this.find('a:internal:not(.no-ajaxy)').click(function(event){
+			$links.find('a:internal:not(.no-ajaxy)').click(function(event){
 				// Prepare
 				var
-					$this = $(this),
-					url = $this.attr('href'),
-					title = $this.attr('title')||null;
+					$links = $(this),
+					url = $links.attr('href'),
+					title = $links.attr('title')||null;
 
 				// Continue as normal for cmd clicks etc
 				if ( event.which == 2 || event.metaKey ) { return true; }
@@ -96,11 +93,11 @@
 			});
 
 			// Chain
-			return $this;
+			return $links;
 		};
 
 		// Ajaxify our Internal Links
-		$ajaxifyTarget.ajaxifyHelper();
+		setupLinks($ajaxifyTarget);
 
 		// Hook into State Changes
 		$window.bind('statechange',function(){
@@ -150,7 +147,8 @@
 
 					// Update the content
 					$content.stop(true,true);
-					$content.html(contentHtml).filter(settings.linkSelector).ajaxifyHelper();
+					$content.html(contentHtml);
+					setupLinks($content.filter(settings.linkSelector));
 					$content.css('opacity',100).show(); /* you could fade in here if you'd like */
 
 					// Update the title
