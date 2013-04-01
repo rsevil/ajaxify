@@ -3,6 +3,7 @@
 // https://github.com/browserstate/ajaxify
 (function( $ ){
 	$.fn.ajaxify = function ( options ) {
+
 		// Prepare our Variables
 		var
 			History = window.History,
@@ -15,11 +16,11 @@
 			return false;
 		}
 
-		console.log($ajaxifyTarget);
-
 		// Settings
 		var settings = $.extend( {
 			contentSelector : 'main,#main,#content,article:first,.article:first,.post:first',
+			// TODO: .selector is deprecated. We should find an alternative.
+			linkSelector : $ajaxifyTarget.selector,
 			menuSelector : '#menu,#nav,nav:first,.nav:first',
 			activeClass : 'active selected current youarehere',
 			activeSelector : '.active,.selected,.current,.youarehere',
@@ -85,7 +86,6 @@
 
 				// Continue as normal for cmd clicks etc
 				if ( event.which == 2 || event.metaKey ) { return true; }
-				console.log('ouch!');
 				// Ajaxify this link
 				History.pushState(null,title,url);
 				event.preventDefault();
@@ -147,7 +147,8 @@
 
 					// Update the content
 					$content.stop(true,true);
-					$content.html(contentHtml).ajaxifyHelper().css('opacity',100).show(); /* you could fade in here if you'd like */
+					$content.html(contentHtml).filter('settings.linkSelector').ajaxifyHelper();
+					$content.css('opacity',100).show(); /* you could fade in here if you'd like */
 
 					// Update the title
 					document.title = $data.find('.document-title:first').text();
