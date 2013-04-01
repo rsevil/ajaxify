@@ -19,7 +19,7 @@
 		// Settings
 		var settings = $.extend( {
 			contentSelector : 'main,#main,#content,article:first,.article:first,.post:first',
-			linkSelector : '',
+			linkContainerSelector : '',
 			menuSelector : '#menu,#nav,nav:first,.nav:first',
 			activeClass : 'active selected current youarehere',
 			activeSelector : '.active,.selected,.current,.youarehere',
@@ -30,11 +30,11 @@
 				easing:'swing'
 			}
 		}, options);
-		if (settings.linkSelector === '') {
-			settings.linkSelector = settings.contentSelector;
+		if (settings.linkContainerSelector === '') {
+			settings.linkContainerSelector = settings.contentSelector;
 		}
 		// Prepare internal variables
-		var $content = $(settings.contentSelector).filter(':first'),
+		var $content = $(settings.contentSelector).first(),
 		contentNode = $content.get(0),
 		$menu = $(settings.menuSelector),
 		$window = $(window),
@@ -87,6 +87,7 @@
 				// Continue as normal for cmd clicks etc
 				if ( event.which == 2 || event.metaKey ) { return true; }
 				// Ajaxify this link
+				//loadPage(url);
 				History.pushState(null,title,url);
 				event.preventDefault();
 				return false;
@@ -96,8 +97,7 @@
 			return $links;
 		};
 
-		// Ajaxify our Internal Links
-		setupLinks($ajaxifyTarget);
+		setupLinks($(settings.linkContainerSelector).first());
 
 		// Hook into State Changes
 		$window.bind('statechange',function(){
@@ -148,7 +148,7 @@
 					// Update the content
 					$content.stop(true,true);
 					$content.html(contentHtml);
-					setupLinks($content.filter(settings.linkSelector));
+					setupLinks($content.filter(settings.linkContainerSelector).first());
 					$content.css('opacity',100).show(); /* you could fade in here if you'd like */
 
 					// Update the title
