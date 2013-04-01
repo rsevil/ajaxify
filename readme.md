@@ -16,15 +16,34 @@ Ajaxify your entire website instantly with this simple drop-in script using the 
 
 <!-- Ajaxify -->
 <script defer src="//raw.github.com/browserstate/ajaxify/master/ajaxify-html5.js"></script>  
+
+<!-- Tell Ajaxify what to look for -->
+<script>
+$(document).ready(function () {
+	$('main,#main,#content,article:first,.article:first,.post:first').ajaxify();	
+});
+</script>
 ```
 
 ## Usage
 
-In JavaScript, call the plugin on an element containing links that you'd like to ajaxify.
+The installation instructions above should get Ajaxify up and running. The last bit of JavaScript tells Ajaxify to look for your main content area in the most common places. If your content is located elsewhere (or if you'd just like Ajaxify to work a little more efficiently), you can tell it where to look:
 
 ``` javascript
-$('body').ajaxify();
+$('#myAwesomeContent').ajaxify();
 ```
+
+## Advanced Usage
+
+By default, Ajaxify assumes that your links and your content are in the same place. If you want it to do something different, though, you can pass options to it. For example, you might want to set it up so that when the user clicks a link in the sidebar, Ajaxify updates the content area but not the sidebar. To accomplish that, you could could set the contentSelector option:
+
+``` javascript
+$('#sidebar').ajaxify({
+    contentSelector : '#main'
+});
+```
+
+Now clicking links in the sidebar will AJAX load the content area, but clicking links in the content area will trigger a normal, non-AJAX page load.
 
 ## Bookmarklet
 
