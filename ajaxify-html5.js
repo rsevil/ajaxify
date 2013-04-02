@@ -3,6 +3,7 @@
 // https://github.com/browserstate/ajaxify
 (function( $ ){
 	$.fn.ajaxify = function ( options ) {
+
 		// Prepare our Variables
 		var
 			History = window.History,
@@ -17,7 +18,8 @@
 
 		// Settings
 		var settings = $.extend( {
-			contentSelector : '',
+			contentSelector : 'main,#main,#content,article:first,.article:first,.post:first',
+			linkContainerSelector : '',
 			menuSelector : '#menu,#nav,nav:first,.nav:first',
 			activeClass : 'active selected current youarehere',
 			activeSelector : '.active,.selected,.current,.youarehere',
@@ -28,14 +30,12 @@
 				easing:'swing'
 			}
 		}, options);
-		// Prepare internal variables
-		var $content;
-		if (settings.contentSelector !== '') {
-			$content = $(settings.contentSelector).filter(':first');
-		} else {
-			$content = $ajaxifyTarget.filter(':first');
+		if (settings.linkContainerSelector === '') {
+			settings.linkContainerSelector = settings.contentSelector;
 		}
-		var contentNode = $content.get(0),
+		// Prepare internal variables
+		var $content = $(settings.contentSelector).first(),
+		contentNode = $content.get(0),
 		$menu = $(settings.menuSelector),
 		$window = $(window),
 		$body = $(document.body),
@@ -75,41 +75,72 @@
 		};
 
 		// Ajaxify Helper
-		$.fn.ajaxifyHelper = function(){
-			// Prepare
-			var $this = $(this);
-
+		function setupLinks($links){
 			// Ajaxify
-			$this.find('a:internal:not(.no-ajaxy)').click(function(event){
+			$links.find('a:internal:not(.no-ajaxy)').click(function(event){
 				// Prepare
 				var
-					$this = $(this),
-					url = $this.attr('href'),
-					title = $this.attr('title')||null;
-
+					$links = $(this),
+					url = $links.attr('href'),
+					title = $links.attr('title')||null,
+					stateData = { 
+						ajaxifyData : {
+							instance : JSON.stringify(settings),
+							referrer : document.location.toString()
+							//TODO: Make the instance ID a hash of settings, so that it's less data but still consistent across page loads (as opposed to a random number, which is short but not consistent).
+						}
+					}
 				// Continue as normal for cmd clicks etc
 				if ( event.which == 2 || event.metaKey ) { return true; }
-
 				// Ajaxify this link
-				History.pushState(null,title,url);
+				History.pushState(stateData,title,url);
 				event.preventDefault();
 				return false;
 			});
 
 			// Chain
-			return $this;
+			return $links;
 		};
 
-		// Ajaxify our Internal Links
-		$ajaxifyTarget.ajaxifyHelper();
+		setupLinks($(settings.linkContainerSelector).first());
+
+
+		$window.bind(settings.completedEventName,function(){
+			//TODO: do this with event delegation so that we don't have to set these up on every ajax call.
+			setupLinks($(settings.linkContainerSelector).first());
+		});
 
 		// Hook into State Changes
 		$window.bind('statechange',function(){
+			setupLinks($(settings.linkContainerSelector).first());
+
 			// Prepare Variables
-			var
-				State = History.getState(),
+			var State = History.getState(),
+				savedStates = History.savedStates,
 				url = State.url,
+				prevUrlIndex = savedStates.length - 2,
+				prevUrl = savedStates[prevUrlIndex].url,
+				stateData = State.data,
+				goingBack = false,
+				prevPage,
 				relativeUrl = url.replace(rootUrl,'');
+
+			if (State.data.ajaxifyData) {
+				if (stateData.ajaxifyData.instance !== JSON.stringify(settings)) {
+					// Another AJAXIFY instance will handle this.
+					return false;
+				}
+				if (stateData.ajaxifyData.referrer !== prevUrl) {
+					// User has gone back
+					// TODO: Ajax load in this case
+					document.location.href = url;
+					return false;
+				}
+			} else {
+				// This page wasn't loaded via Ajax
+				document.location.href = url;
+				return false;
+			}
 
 			// Set Loading
 			$body.addClass('loading');
@@ -151,7 +182,9 @@
 
 					// Update the content
 					$content.stop(true,true);
-					$content.html(contentHtml).ajaxifyHelper().css('opacity',100).show(); /* you could fade in here if you'd like */
+					$content.html(contentHtml);
+					setupLinks($content.filter(settings.linkContainerSelector).first());
+					$content.css('opacity',100).show(); /* you could fade in here if you'd like */
 
 					// Update the title
 					document.title = $data.find('.document-title:first').text();
@@ -182,6 +215,7 @@
 						reinvigorate.ajax_track(url);
 						// ^ we use the full url here as that is what reinvigorate supports
 					}
+					
 				},
 				error: function(jqXHR, textStatus, errorThrown){
 					document.location.href = url;
@@ -189,6 +223,6 @@
 				}
 			}); // end ajax
 
-		}); // end onStateChange
+		}); // end statechange
 	}; // end $.fn.ajaxify
 })( jQuery ); // end closure

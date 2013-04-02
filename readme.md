@@ -20,30 +20,57 @@ Ajaxify your entire website instantly with this simple drop-in script using the 
 <!-- Tell Ajaxify what to look for -->
 <script>
 $(document).ready(function () {
-	$('main,#main,#content,article:first,.article:first,.post:first').ajaxify();	
+	$('body').ajaxify();	
 });
 </script>
 ```
 
 ## Usage
 
-The installation instructions above should get Ajaxify up and running. The last bit of JavaScript tells Ajaxify to look for your main content area in the most common places. If your content is located elsewhere (or if you'd just like Ajaxify to work a little more efficiently), you can tell it where to look:
+The installation instructions above should get Ajaxify up and running. The last bit of JavaScript says that Ajaxify should be applied to all the links on your page. If you actually only want to ajaxify certain links, you can do that as well:
 
 ``` javascript
-$('#myAwesomeContent').ajaxify();
+$('#ajaxNavigation').ajaxify();
 ```
 
 ## Advanced Usage
 
-By default, Ajaxify assumes that your links and your content are in the same place. If you want it to do something different, though, you can pass options to it. For example, you might want to set it up so that when the user clicks a link in the sidebar, Ajaxify updates the content area but not the sidebar. To accomplish that, you could could set the contentSelector option:
+By default, ajaxify looks for content in the most common places:
+
+```css
+main,#main,#content,article:first,.article:first,.post:first
+```
+
+Your content might actually be elsewhere. If so, just do something like this:
+
+```javascript
+$('body').ajaxify({
+    contentSelector : '#myAwesomeContent'
+});
+```
+
+You can get really fancy with this if you want. For example, you might want to set up Ajaxify so that when the user clicks a link in the sidebar, Ajaxify updates the content area but not the sidebar. To accomplish that, you could could do something like this:
 
 ``` javascript
-$('#sidebar').ajaxify({
-    contentSelector : '#main'
+$('body').ajaxify({
+    contentSelector : '#main',
+    linkContainerSelector '#sidebar'
 });
 ```
 
 Now clicking links in the sidebar will AJAX load the content area, but clicking links in the content area will trigger a normal, non-AJAX page load.
+
+## To Do
+
+We've rewritten this fork of Ajaxify to work as a jQuery plugin that allows the user to have different AJAX behavior for different parts of the page. Some features are still underway. In particular:
+
+* We're not currently AJAX loading when the user hits the back button; we're just doing a standard page load. AJAX loading for the back button will be added later. AJAX loading on forward should work, though.
+* We'll provide more options for load animations.
+* We'll provide a generic content selector that can be used to reload most/all of the page when going back.
+* We'll set up links using event delegation so that this library plays nice with other AJAX loading stuff that might be going on (e.g., infinite scroll).
+* We'd like to implement full jQuery 1.9 compatibility so that you don't need to include jQuery migrate to use this library.
+
+This is in development and probably shouldn't be used on a production site yet. API may change. Stuff is not guaranteed not to blow up. Consult your doctor before using taking Ajaxify.
 
 ## Bookmarklet
 
