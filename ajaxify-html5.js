@@ -132,6 +132,7 @@
 
 				} else {
 					// This instance of Ajaxify will handle.
+					// TODO: we're getting to this point twice for each link clicked. Figure out why.
 				}
 				if (stateData.ajaxifyData.referrer !== prevUrl) {
 					// User has gone back
