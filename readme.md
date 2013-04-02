@@ -70,7 +70,7 @@ We've rewritten this fork of Ajaxify to work as a jQuery plugin that allows the 
 * We'll set up links using event delegation so that this library plays nice with other AJAX loading stuff that might be going on (e.g., infinite scroll).
 * We'd like to implement full jQuery 1.9 compatibility so that you don't need to include jQuery migrate to use this library.
 
-This is in development and probably shouldn't be used on a production site yet. API may change. Stuff is not guaranteed not to blow up. Consult your doctor before using taking Ajaxify.
+This is in development and probably shouldn't be used on a production site yet. API may change. Stuff is not guaranteed not to blow up. Consult your doctor before using Ajaxify.
 
 ## Bookmarklet
 
