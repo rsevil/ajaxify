@@ -84,16 +84,15 @@
 					url = $links.attr('href'),
 					title = $links.attr('title')||null,
 					stateData = { 
-						ajaxifySettings : {
-							'linkContainerSelector' : settings.linkContainerSelector,
-							'contentSelector' : settings.contentSelector
+						ajaxifyData : {
+							instance : JSON.stringify(settings),
+							referrer : document.location.toString()
+							//TODO: Make the instance ID a hash of settings, so that it's less data but still consistent across page loads (as opposed to a random number, which is short but not consistent).
 						}
 					}
-
 				// Continue as normal for cmd clicks etc
 				if ( event.which == 2 || event.metaKey ) { return true; }
 				// Ajaxify this link
-
 				History.pushState(stateData,title,url);
 				event.preventDefault();
 				return false;
@@ -105,32 +104,43 @@
 
 		setupLinks($(settings.linkContainerSelector).first());
 
+
+		$window.bind(settings.completedEventName,function(){
+			//TODO: do this with event delegation so that we don't have to set these up on every ajax call.
+			setupLinks($(settings.linkContainerSelector).first());
+		});
+
 		// Hook into State Changes
 		$window.bind('statechange',function(){
-			var State = History.getState(),
-				stateData = State.data,
-				url = State.url,
-				tContentSelector, // Transition link selector - local variable just for the transition
-				tLinkContainerSelector; // Transition container selector - local variable just for the container
-				relativeUrl = url.replace(rootUrl,'');
-			/* If possible, retreive the settings that were set when the link was clicked. This is
-			important because Ajaxify might be called multiple times.
-			We might be transitioning to this state or from this state - we don't know which. */
-			if (stateData.ajaxifySettings) {
-				tContentSelector = stateData.ajaxifySettings.contentSelector;
-				tLinkContainerSelector = stateData.ajaxifySettings.linkContainerSelector;
-			} else {
-				// We must not have arrived to this page via Ajaxify. Maybe this is the first page on the site that the user visited.
-				tContentSelector = settings.contentSelector;
-				tLinkContainerSelector = settings.linkContainerSelector;
-			}
-
-			// Start loading via AJAX
+			setupLinks($(settings.linkContainerSelector).first());
 
 			// Prepare Variables
-			var relativeUrl = url.replace(rootUrl,'');
-				//State = History.getState(),
-				//url = State.url,
+			var State = History.getState(),
+				savedStates = History.savedStates,
+				url = State.url,
+				prevUrlIndex = savedStates.length - 2,
+				prevUrl = savedStates[prevUrlIndex].url,
+				stateData = State.data,
+				goingBack = false,
+				prevPage,
+				relativeUrl = url.replace(rootUrl,'');
+
+			if (State.data.ajaxifyData) {
+				if (stateData.ajaxifyData.instance !== JSON.stringify(settings)) {
+					// Another AJAXIFY instance will handle this.
+					return false;
+				}
+				if (stateData.ajaxifyData.referrer !== prevUrl) {
+					// User has gone back
+					// TODO: Ajax load in this case
+					document.location.href = url;
+					return false;
+				}
+			} else {
+				// This page wasn't loaded via Ajax
+				document.location.href = url;
+				return false;
+			}
 
 			// Set Loading
 			$body.addClass('loading');
@@ -148,7 +158,7 @@
 					var
 						$data = $(documentHtml(data)),
 						$dataBody = $data.find('.document-body:first'),
-						$dataContent = $dataBody.find(tContentSelector).filter(':first'),
+						$dataContent = $dataBody.find(settings.contentSelector).filter(':first'),
 						$menuChildren, contentHtml, $scripts;
 
 					// Fetch the scripts
@@ -173,7 +183,7 @@
 					// Update the content
 					$content.stop(true,true);
 					$content.html(contentHtml);
-					setupLinks($content.filter(tLinkContainerSelector).first());
+					setupLinks($content.filter(settings.linkContainerSelector).first());
 					$content.css('opacity',100).show(); /* you could fade in here if you'd like */
 
 					// Update the title
@@ -205,6 +215,7 @@
 						reinvigorate.ajax_track(url);
 						// ^ we use the full url here as that is what reinvigorate supports
 					}
+					
 				},
 				error: function(jqXHR, textStatus, errorThrown){
 					document.location.href = url;
@@ -212,9 +223,6 @@
 				}
 			}); // end ajax
 
-		});
-
-		
-
+		}); // end statechange
 	}; // end $.fn.ajaxify
 })( jQuery ); // end closure
