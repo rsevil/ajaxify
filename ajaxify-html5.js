@@ -1,6 +1,6 @@
 // Ajaxify
-// v1.0.1 - 30 September, 2012
-// https://github.com/browserstate/ajaxify
+// v2.0 work in progress
+// https://github.com/prod4ever/ajaxify
 (function( $ ){
 	$.fn.ajaxify = function ( options ) {
 
@@ -129,6 +129,9 @@
 				if (stateData.ajaxifyData.instance !== JSON.stringify(settings)) {
 					// Another AJAXIFY instance will handle this.
 					return false;
+
+				} else {
+					// This instance of Ajaxify will handle.
 				}
 				if (stateData.ajaxifyData.referrer !== prevUrl) {
 					// User has gone back
@@ -144,6 +147,10 @@
 
 			// Set Loading
 			$body.addClass('loading');
+
+			// Page may have been changed since this instance of Ajaxify was first called., so update $content.
+			$content = $(settings.contentSelector).first(),
+			contentNode = $content.get(0);
 
 			// Start Fade Out
 			// Animating to opacity to 0 still keeps the element's height intact
@@ -182,6 +189,7 @@
 
 					// Update the content
 					$content.stop(true,true);
+
 					$content.html(contentHtml);
 					setupLinks($content.filter(settings.linkContainerSelector).first());
 					$content.css('opacity',100).show(); /* you could fade in here if you'd like */
