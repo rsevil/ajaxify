@@ -1,6 +1,7 @@
 // Ajaxify
 // v2.0 work in progress
 // https://github.com/prod4ever/ajaxify
+
 (function( $ ){
 	$.fn.ajaxify = function ( options ) {
 
