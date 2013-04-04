@@ -89,7 +89,7 @@
 							referrer : document.location.toString()
 							//TODO: Make the instance ID a hash of settings, so that it's less data but still consistent across page loads (as opposed to a random number, which is short but not consistent).
 						}
-					}
+					};
 				// Continue as normal for cmd clicks etc
 				if ( event.which == 2 || event.metaKey ) { return true; }
 				// Ajaxify this link
@@ -100,7 +100,7 @@
 
 			// Chain
 			return $links;
-		};
+		}
 
 		setupLinks($(settings.linkContainerSelector).first());
 
