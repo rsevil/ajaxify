@@ -111,7 +111,7 @@
 		});
 
 		// Hook into State Changes
-		$window.bind('statechange',function(){
+		$window.bind('statechange',function() {
 			setupLinks($(settings.linkContainerSelector).first());
 
 			// Prepare Variables
@@ -212,7 +212,7 @@
 					// Complete the change
 					if ( $body.ScrollTo||false ) { $body.ScrollTo(settings.scrollOptions); } /* http://balupton.com/projects/jquery-scrollto */
 					$body.removeClass('loading');
-					$window.trigger(settings.completedEventName);
+					$window.trigger(settings.completedEventName, data);
 
 					// Inform Google Analytics of the change
 					if ( typeof window._gaq !== 'undefined' ) {
