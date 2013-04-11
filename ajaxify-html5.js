@@ -104,15 +104,8 @@
 
 		setupLinks($(settings.linkContainerSelector).first());
 
-
-		$window.bind(settings.completedEventName,function(){
-			//TODO: do this with event delegation so that we don't have to set these up on every ajax call.
-			setupLinks($(settings.linkContainerSelector).first());
-		});
-
 		// Hook into State Changes
 		$window.bind('statechange',function() {
-			setupLinks($(settings.linkContainerSelector).first());
 
 			// Prepare Variables
 			var State = History.getState(),
@@ -149,7 +142,7 @@
 			// Set Loading
 			$body.addClass('loading');
 
-			// Page may have been changed since this instance of Ajaxify was first called., so update $content.
+			// Page may have been changed since this instance of Ajaxify was first called, so update $content.
 			$content = $(settings.contentSelector).first(),
 			contentNode = $content.get(0);
 
@@ -192,7 +185,6 @@
 					$content.stop(true,true);
 
 					$content.html(contentHtml);
-					setupLinks($content.filter(settings.linkContainerSelector).first());
 					$content.css('opacity',100).show(); /* you could fade in here if you'd like */
 
 					// Update the title
