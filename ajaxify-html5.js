@@ -78,26 +78,25 @@
 		// Ajaxify Helper
 		function setupLinks($links){
 			// Ajaxify
-			$links.find('a:internal:not(.no-ajaxy)').click(function(event){
-				// Prepare
-				var
-					$links = $(this),
-					url = $links.attr('href'),
-					title = $links.attr('title')||null,
-					stateData = { 
-						ajaxifyData : {
-							instance : JSON.stringify(settings),
-							referrer : document.location.toString()
-							//TODO: Make the instance ID a hash of settings, so that it's less data but still consistent across page loads (as opposed to a random number, which is short but not consistent).
-						}
-					};
-				// Continue as normal for cmd clicks etc
-				if ( event.which == 2 || event.metaKey ) { return true; }
-				// Ajaxify this link
-				History.pushState(stateData,title,url);
-				event.preventDefault();
-				return false;
-			});
+            $("body").on("click", settings.linkContainerSelector + ' a:internal:not(.no-ajaxy)', function(event) {
+                var
+                    $links = $(this),
+                    url = $links.attr('href'),
+                    title = $links.attr('title')||null,
+                    stateData = {
+                        ajaxifyData : {
+                            instance : JSON.stringify(settings),
+                            referrer : document.location.toString()
+                            //TODO: Make the instance ID a hash of settings, so that it's less data but still consistent across page loads (as opposed to a random number, which is short but not consistent).
+                        }
+                    };
+                // Continue as normal for cmd clicks etc
+                if ( event.which == 2 || event.metaKey ) { return true; }
+                // Ajaxify this link
+                History.pushState(stateData,title,url);
+                event.preventDefault();
+                return false;
+            });
 
 			// Chain
 			return $links;
