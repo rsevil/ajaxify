@@ -26,6 +26,7 @@
 			activeSelector : '.active,.selected,.current,.youarehere',
 			menuChildrenSelector : '> li,> ul > li',
 			completedEventName : 'statechangecomplete',
+            postCompletedEventName : '',
 			scrollOptions : {
 				duration: 800,
 				easing:'swing'
@@ -205,6 +206,8 @@
 					if ( $body.ScrollTo||false ) { $body.ScrollTo(settings.scrollOptions); } /* http://balupton.com/projects/jquery-scrollto */
 					$body.removeClass('loading');
 					$window.trigger(settings.completedEventName, data);
+
+                    $window.trigger(settings.postCompletedEventName);
 
 					// Inform Google Analytics of the change
 					if ( typeof window._gaq !== 'undefined' ) {
