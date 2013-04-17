@@ -87,7 +87,7 @@
                     stateData = {
                         ajaxifyData : {
                             instance : JSON.stringify(settings),
-                            referrer : document.location.toString()
+                            referrer : unescape(document.location.toString())
                             //TODO: Make the instance ID a hash of settings, so that it's less data but still consistent across page loads (as opposed to a random number, which is short but not consistent).
                         }
                     };
