@@ -1,6 +1,7 @@
 // Ajaxify
 // v2.0 work in progress
 // https://github.com/prod4ever/ajaxify
+
 (function( $ ){
 	$.fn.ajaxify = function ( options ) {
 
@@ -25,7 +26,7 @@
 			activeSelector : '.active,.selected,.current,.youarehere',
 			menuChildrenSelector : '> li,> ul > li',
 			completedEventName : 'statechangecomplete',
-			postCompletedEventName : '',
+            postCompletedEventName : '',
 			scrollOptions : {
 				duration: 800,
 				easing:'swing'
@@ -78,42 +79,34 @@
 		// Ajaxify Helper
 		function setupLinks($links){
 			// Ajaxify
-			$("body").on("click", settings.linkContainerSelector + ' a:internal:not(.no-ajaxy)', function(event) {
-				// Prepare
-				var
-					$links = $(this),
-					url = $links.attr('href'),
-					title = $links.attr('title')||null,
-					stateData = { 
-						ajaxifyData : {
-							instance : JSON.stringify(settings),
-							referrer : document.location.toString()
-							//TODO: Make the instance ID a hash of settings, so that it's less data but still consistent across page loads (as opposed to a random number, which is short but not consistent).
-						}
-					}
-				// Continue as normal for cmd clicks etc
-				if ( event.which == 2 || event.metaKey ) { return true; }
-				// Ajaxify this link
-				History.pushState(stateData,title,url);
-				event.preventDefault();
-				return false;
-			});
+            $("body").on("click", settings.linkContainerSelector + ' a:internal:not(.no-ajaxy)', function(event) {
+                var
+                    $links = $(this),
+                    url = $links.attr('href'),
+                    title = $links.attr('title')||null,
+                    stateData = {
+                        ajaxifyData : {
+                            instance : JSON.stringify(settings),
+                            referrer : unescape(document.location.toString())
+                            //TODO: Make the instance ID a hash of settings, so that it's less data but still consistent across page loads (as opposed to a random number, which is short but not consistent).
+                        }
+                    };
+                // Continue as normal for cmd clicks etc
+                if ( event.which == 2 || event.metaKey ) { return true; }
+                // Ajaxify this link
+                History.pushState(stateData,title,url);
+                event.preventDefault();
+                return false;
+            });
 
 			// Chain
 			return $links;
-		};
+		}
 
 		setupLinks($(settings.linkContainerSelector).first());
 
-
-		$window.bind(settings.completedEventName,function(){
-			//TODO: do this with event delegation so that we don't have to set these up on every ajax call.
-			setupLinks($(settings.linkContainerSelector).first());
-		});
-
 		// Hook into State Changes
-		$window.bind('statechange',function(){
-			setupLinks($(settings.linkContainerSelector).first());
+		$window.bind('statechange',function() {
 
 			// Prepare Variables
 			var State = History.getState(),
@@ -150,7 +143,7 @@
 			// Set Loading
 			$body.addClass('loading');
 
-			// Page may have been changed since this instance of Ajaxify was first called., so update $content.
+			// Page may have been changed since this instance of Ajaxify was first called, so update $content.
 			$content = $(settings.contentSelector).first(),
 			contentNode = $content.get(0);
 
@@ -193,7 +186,6 @@
 					$content.stop(true,true);
 
 					$content.html(contentHtml);
-					setupLinks($content.filter(settings.linkContainerSelector).first());
 					$content.css('opacity',100).show(); /* you could fade in here if you'd like */
 
 					// Update the title
@@ -218,7 +210,6 @@
 					if ( $body.ScrollTo||false ) { $body.ScrollTo(settings.scrollOptions); } /* http://balupton.com/projects/jquery-scrollto */
 					$body.removeClass('loading');
 					$window.trigger(settings.completedEventName, data);
-                    $window.trigger(settings.postCompletedEventName);
 
 					// Inform Google Analytics of the change
 					if ( typeof window._gaq !== 'undefined' ) {
