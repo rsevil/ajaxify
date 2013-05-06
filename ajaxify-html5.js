@@ -25,6 +25,7 @@
 			activeSelector : '.active,.selected,.current,.youarehere',
 			menuChildrenSelector : '> li,> ul > li',
 			completedEventName : 'statechangecomplete',
+			postCompletedEventName : '',
 			scrollOptions : {
 				duration: 800,
 				easing:'swing'
@@ -71,13 +72,13 @@
 			;
 
 			// Return
-			return result;
+			return $.trim(result);
 		};
 
 		// Ajaxify Helper
 		function setupLinks($links){
 			// Ajaxify
-			$links.find('a:internal:not(.no-ajaxy)').click(function(event){
+			$("body").on("click", settings.linkContainerSelector + ' a:internal:not(.no-ajaxy)', function(event) {
 				// Prepare
 				var
 					$links = $(this),
@@ -132,6 +133,7 @@
 
 				} else {
 					// This instance of Ajaxify will handle.
+					// TODO: we're getting to this point twice for each link clicked. Figure out why.
 				}
 				if (stateData.ajaxifyData.referrer !== prevUrl) {
 					// User has gone back
@@ -204,14 +206,19 @@
 					// Add the scripts
 					$scripts.each(function(){
 						var $script = $(this), scriptText = $script.text(), scriptNode = document.createElement('script');
-						scriptNode.appendChild(document.createTextNode(scriptText));
+						if ( $script.attr('src') ) {
+							if ( !$script[0].async ) { scriptNode.async = false; }
+							scriptNode.src = $script.attr('src');
+						}
+    						scriptNode.appendChild(document.createTextNode(scriptText));
 						contentNode.appendChild(scriptNode);
 					});
 
 					// Complete the change
 					if ( $body.ScrollTo||false ) { $body.ScrollTo(settings.scrollOptions); } /* http://balupton.com/projects/jquery-scrollto */
 					$body.removeClass('loading');
-					$window.trigger(settings.completedEventName);
+					$window.trigger(settings.completedEventName, data);
+                    $window.trigger(settings.postCompletedEventName);
 
 					// Inform Google Analytics of the change
 					if ( typeof window._gaq !== 'undefined' ) {
