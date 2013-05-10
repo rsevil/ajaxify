@@ -30,7 +30,19 @@
 			scrollOptions : {
 				duration: 800,
 				easing:'swing'
-			}
+			},
+			startAnim : function($oldContent, $newContent, url) { // Callback to be fired before new content is loaded. This function typically hides the old content, but you could keep it onscreen if you want. If keepOldContent is false, newContent will be an empty jQuery object.
+				// Animating to opacity to 0 still keeps the element's height intact
+				// Which prevents that annoying pop bang issue when loading in new content
+				$oldContent.animate({opacity:0},800);
+			},
+			endAnim : function($oldContent, $newContent, url, completedEventName, data) { // Callback to be fired before new content is loaded. This function shows the new content. If keepOldContent is false, oldContent will be an empty jQuery object.
+				$oldContent.remove();
+				$newContent.css({ 'opacity' : 0, 'display' : 'block'}).animate({opacity:1},800);
+				$('body').removeClass('loading');
+				$(window).trigger(completedEventName, data);
+			}, 
+			keepOldContent : false // Should we keep the old content around so that endAnim can do stuff with it? If so, be sure to remove the old content in endAnim when you are done.
 		}, options);
 		if (settings.linkContainerSelector === '') {
 			settings.linkContainerSelector = settings.contentSelector;
@@ -79,7 +91,7 @@
 		// Ajaxify Helper
 		function setupLinks($links){
 			// Ajaxify
-            $("body").on("click", settings.linkContainerSelector + ' a:internal:not(.no-ajaxy)', function(event) {
+            $($ajaxifyTarget).on("click", settings.linkContainerSelector + ' a:internal:not(.no-ajaxy)', function(event) {
                 var
                     $links = $(this),
                     url = $links.attr('href'),
@@ -113,7 +125,7 @@
 				savedStates = History.savedStates,
 				url = State.url,
 				prevUrlIndex = savedStates.length - 2,
-				prevUrl = savedStates[prevUrlIndex].url,
+				prevUrl = savedStates[prevUrlIndex].url, // If this is the user's first time ajax loading something, this will be undefined.
 				stateData = State.data,
 				goingBack = false,
 				prevPage,
@@ -147,10 +159,17 @@
 			$content = $(settings.contentSelector).first(),
 			contentNode = $content.get(0);
 
-			// Start Fade Out
-			// Animating to opacity to 0 still keeps the element's height intact
-			// Which prevents that annoying pop bang issue when loading in new content
-			$content.animate({opacity:0},800);
+			if (settings.keepOldContent) {
+				$content
+					.wrapInner('<div id="ajaxify-oldContent" />')
+					.append('<div id="ajaxify-newContent" style="display: none;" />');
+				settings.startAnim($('#ajaxify-oldContent'), $('#ajaxify-newContent'), url);
+			} else {
+				settings.startAnim($content, $(), url);
+			}
+
+			// Hide the existing content
+			
 
 			// Ajax Request the Traditional Page
 			$.ajax({
@@ -185,8 +204,11 @@
 					// Update the content
 					$content.stop(true,true);
 
-					$content.html(contentHtml);
-					$content.css('opacity',100).show(); /* you could fade in here if you'd like */
+					if (settings.keepOldContent) {
+						$('#ajaxify-newContent').html(contentHtml);
+					} else {
+						$content.html(contentHtml);
+					}
 
 					// Update the title
 					document.title = $data.find('.document-title:first').text();
@@ -208,8 +230,7 @@
 
 					// Complete the change
 					if ( $body.ScrollTo||false ) { $body.ScrollTo(settings.scrollOptions); } /* http://balupton.com/projects/jquery-scrollto */
-					$body.removeClass('loading');
-					$window.trigger(settings.completedEventName, data);
+					
 
 					// Inform Google Analytics of the change
 					if ( typeof window._gaq !== 'undefined' ) {
@@ -220,6 +241,12 @@
 					if ( typeof window.reinvigorate !== 'undefined' && typeof window.reinvigorate.ajax_track !== 'undefined' ) {
 						reinvigorate.ajax_track(url);
 						// ^ we use the full url here as that is what reinvigorate supports
+					}
+
+					if (settings.keepOldContent) {
+						settings.endAnim($('#ajaxify-oldContent'), $('#ajaxify-newContent'), url, settings.completedEventName, data);
+					} else {
+						settings.endAnim($(), $content, url, settings.completedEventName, data);
 					}
 					
 				},
