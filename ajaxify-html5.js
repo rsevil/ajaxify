@@ -39,7 +39,7 @@
 			endAnim : function($oldContent, $newContent, url, completedEventName, data) { // Callback to be fired before new content is loaded. This function shows the new content. If keepOldContent is false, oldContent will be an empty jQuery object.
 				$oldContent.remove();
 				$newContent.css({ 'opacity' : 0, 'display' : 'block'}).animate({opacity:1},800);
-				$('body').removeClass('loading');
+				$('body').removeClass('ajaxify-loading');
 				$(window).trigger(completedEventName, data);
 			}, 
 			keepOldContent : false // Should we keep the old content around so that endAnim can do stuff with it? If so, be sure to remove the old content in endAnim when you are done.
@@ -153,7 +153,7 @@
 			}
 
 			// Set Loading
-			$body.addClass('loading');
+			$body.addClass('ajaxify-loading');
 
 			// Page may have been changed since this instance of Ajaxify was first called, so update $content.
 			$content = $(settings.contentSelector).first(),
