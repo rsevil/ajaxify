@@ -115,7 +115,7 @@
 			return $links;
 		}
 
-		setupLinks($(settings.linkContainerSelector).first());
+		setupLinks($(settings.linkContainerSelector));
 
 		// Hook into State Changes
 		$window.bind('statechange',function() {
