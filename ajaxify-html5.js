@@ -90,8 +90,9 @@
 
 		// Ajaxify Helper
 		function setupLinks($links){
-			// Ajaxify
-            $($ajaxifyTarget).on("click", settings.linkContainerSelector + ' a:internal:not(.no-ajaxy)', function(event) {
+			var linkSelector = ' a:internal:not(.no-ajaxy)',
+				fullLinkSelector = settings.linkContainerSelector.replace(',', linkSelector + ',') + linkSelector;
+            $($ajaxifyTarget).on("click", fullLinkSelector, function(event) {
                 var
                     $links = $(this),
                     url = $links.attr('href'),
