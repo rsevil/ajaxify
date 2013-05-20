@@ -230,7 +230,7 @@
 					});
 
 					// Complete the change
-					if ( $body.ScrollTo||false ) { $body.ScrollTo(settings.scrollOptions); } /* http://balupton.com/projects/jquery-scrollto */
+					if ( $body.scrollTo||false ) { $.scrollTo($body, settings.scrollOptions); } /* http://balupton.com/projects/jquery-scrollto */
 					
 
 					// Inform Google Analytics of the change
