@@ -91,7 +91,7 @@
 		// Ajaxify Helper
 		function setupLinks($links){
 			var linkSelector = ' a:internal:not(.no-ajaxy)',
-				fullLinkSelector = settings.linkContainerSelector.replace(',', linkSelector + ',') + linkSelector;
+				fullLinkSelector = settings.linkContainerSelector.replace(/\,/g, linkSelector + ',') + linkSelector;
             $($ajaxifyTarget).on("click", fullLinkSelector, function(event) {
                 var
                     $links = $(this),
