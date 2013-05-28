@@ -26,7 +26,6 @@
 			activeSelector : '.active,.selected,.current,.youarehere',
 			menuChildrenSelector : '> li,> ul > li',
 			completedEventName : 'statechangecomplete',
-            postCompletedEventName : '',
 			scrollOptions : {
 				duration: 800,
 				easing:'swing'
@@ -80,8 +79,8 @@
 			// Prepare
 			var result = String(html)
 				.replace(/<\!DOCTYPE[^>]*>/i, '')
-				.replace(/<(html|head|body|title|meta|script)([\s\>])/gi,'<div class="document-$1"$2')
-				.replace(/<\/(html|head|body|title|meta|script)\>/gi,'</div>')
+				.replace(/<(html|head|body|title|meta)([\s\>])/gi,'<div class="document-$1"$2')
+				.replace(/<\/(html|head|body|title|meta)\>/gi,'</div>')
 			;
 
 			// Return
@@ -184,7 +183,7 @@
 						$menuChildren, contentHtml, $scripts;
 
 					// Fetch the scripts
-					$scripts = $dataContent.find('.document-script');
+					$scripts = $dataContent.find('script');
 					if ( $scripts.length ) {
 						$scripts.detach();
 					}
