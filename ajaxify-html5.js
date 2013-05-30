@@ -230,8 +230,8 @@
 					});
 
 					// Complete the change
-					if ( ( $body.scrollTo||false ) && settings.scrollEnabled ) { 
-						$.scrollTo($body, settings.scrollOptions); /* http://balupton.com/projects/jquery-scrollto */
+					if ( ( $body.ScrollTo||false ) && settings.scrollEnabled ) { 
+						$body.ScrollTo(settings.scrollOptions); /* http://balupton.com/projects/jquery-scrollto */
 					}
 
 					// Inform Google Analytics of the change
