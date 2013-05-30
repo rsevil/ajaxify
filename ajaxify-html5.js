@@ -30,6 +30,7 @@
 				duration: 800,
 				easing:'swing'
 			},
+			scrollEnabled : true,
 			startAnim : function($oldContent, $newContent, url) { // Callback to be fired before new content is loaded. This function typically hides the old content, but you could keep it onscreen if you want. If keepOldContent is false, newContent will be an empty jQuery object.
 				// Animating to opacity to 0 still keeps the element's height intact
 				// Which prevents that annoying pop bang issue when loading in new content
@@ -229,8 +230,9 @@
 					});
 
 					// Complete the change
-					if ( $body.scrollTo||false ) { $.scrollTo($body, settings.scrollOptions); } /* http://balupton.com/projects/jquery-scrollto */
-					
+					if ( ( $body.scrollTo||false ) && settings.scrollEnabled ) { 
+						$.scrollTo($body, settings.scrollOptions); /* http://balupton.com/projects/jquery-scrollto */
+					}
 
 					// Inform Google Analytics of the change
 					if ( typeof window._gaq !== 'undefined' ) {
