@@ -80,10 +80,11 @@
 			var
 				$this = $(obj),
 				url = $this.attr('href')||'',
-				isInternalLink;
+				isInternalLink,
+				rootUrlNoTrailingSlash = rootUrl.slice(0,-1); // If our root URL is http://www.example.com/, then http://www.example.com is a perfectly valid internal link.
 
 			// Check link
-			isInternalLink = url.substring(0,rootUrl.length) === rootUrl || url.indexOf(':') === -1;
+			isInternalLink = url.substring(0,rootUrlNoTrailingSlash.length) === rootUrlNoTrailingSlash || url.indexOf(':') === -1;
 
 			// Ignore or Keep
 			return isInternalLink;
