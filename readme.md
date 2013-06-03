@@ -64,13 +64,11 @@ Now clicking links in the sidebar will AJAX load the content area, but clicking 
 
 We've rewritten this fork of Ajaxify to work as a jQuery plugin that allows the user to have different AJAX behavior for different parts of the page. Some features are still underway. In particular:
 
-* We're not currently AJAX loading when the user hits the back button; we're just doing a standard page load. AJAX loading for the back button will be added later. AJAX loading on forward should work, though.
-* We'll provide more options for load animations.
-* We'll provide a generic content selector that can be used to reload most/all of the page when going back.
-* We'll set up links using event delegation so that this library plays nice with other AJAX loading stuff that might be going on (e.g., infinite scroll).
-* We'd like to implement full jQuery 1.9 compatibility so that you don't need to include jQuery migrate to use this library.
+* Write more complete documentation with examples of advanced use cases.
+* Update code style so that it passes JSHint.
+* Test the bookmarklet and fix as needed.
 
-This is in development and probably shouldn't be used on a production site yet. API may change. Stuff is not guaranteed not to blow up. Consult your doctor before using Ajaxify.
+This plugin is in active development. API may change. Stuff is not guaranteed not to blow up. Consult your doctor before using Ajaxify.
 
 ## Bookmarklet
 
