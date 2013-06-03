@@ -10,16 +10,25 @@
 			History = window.History,
 			$ = window.jQuery,
 			document = window.document,
-			$ajaxifyTarget = this; // The element on which Ajaxify was called. Any links in this element will trigger an AJAX load.
+			$ajaxifyTarget = this, // The element on which Ajaxify was called. Any links in this element will trigger an AJAX load.
+			instanceId; // ID for this instance of ajaxify. Starts at 0 and increases each time ajaxify is run.
 
 		// Check to see if History.js is enabled for our Browser
 		if ( !History.enabled ) {
 			return false;
 		}
 
+		if (typeof $.fn.ajaxify.instanceCount === 'undefined') {
+			$.fn.ajaxify.instanceCount = 0;
+		} else {
+			$.fn.ajaxify.instanceCount++;
+		}
+		instanceId = $.fn.ajaxify.instanceCount;
+
 		// Settings
 		var settings = $.extend( {
 			contentSelector : 'main,#main,#content,article:first,.article:first,.post:first',
+			backContentSelector : '#content,main,#main,article:first,.article:first,.post:first', // When the user goes back to a page, we can't just re-run the same animation that was used to show that page, because we might miss some content. Instead, we'll use a selector that's the same as the content selector or broader.
 			linkContainerSelector : '',
 			menuSelector : '#menu,#nav,nav:first,.nav:first',
 			activeClass : 'active selected current youarehere',
@@ -34,12 +43,17 @@
 			startAnim : function($oldContent, $newContent, url) { // Callback to be fired before new content is loaded. This function typically hides the old content, but you could keep it onscreen if you want. If keepOldContent is false, newContent will be an empty jQuery object.
 				// Animating to opacity to 0 still keeps the element's height intact
 				// Which prevents that annoying pop bang issue when loading in new content
-				$oldContent.animate({opacity:0},800);
+				$oldContent.animate({opacity:0},800, function() {
+					$('body').addClass('ajaxify-waiting');
+					// This class indicates that the animation has completed and we are still waiting for data to load.
+				});
 			},
 			endAnim : function($oldContent, $newContent, url, completedEventName, data) { // Callback to be fired before new content is loaded. This function shows the new content. If keepOldContent is false, oldContent will be an empty jQuery object.
 				$oldContent.remove();
-				$newContent.css({ 'opacity' : 0, 'display' : 'block'}).animate({opacity:1},800);
-				$('body').removeClass('ajaxify-loading');
+				$('body').removeClass('ajaxify-loading ajaxify-waiting');
+				$newContent.css({ 'opacity' : 0, 'display' : 'block'}).animate({opacity:1},800, function () {
+					$('body').removeClass('ajaxify-waiting'); // In case endAnim fires before the startAnim is complete
+				});
 				$(window).trigger(completedEventName, data);
 			}, 
 			keepOldContent : false // Should we keep the old content around so that endAnim can do stuff with it? If so, be sure to remove the old content in endAnim when you are done.
@@ -99,7 +113,7 @@
                     title = $links.attr('title')||null,
                     stateData = {
                         ajaxifyData : {
-                            instance : JSON.stringify(settings),
+                            instance : instanceId,
                             referrer : unescape(document.location.toString())
                             //TODO: Make the instance ID a hash of settings, so that it's less data but still consistent across page loads (as opposed to a random number, which is short but not consistent).
                         }
@@ -133,31 +147,38 @@
 				relativeUrl = url.replace(rootUrl,'');
 
 			if (State.data.ajaxifyData) {
-				if (stateData.ajaxifyData.instance !== JSON.stringify(settings)) {
-					// Another AJAXIFY instance will handle this.
+				if ( stateData.ajaxifyData.instance !== instanceId ) {
+					// Another ajaxify instance is handling or will handle this.
 					return false;
 
 				} else {
 					// This instance of Ajaxify will handle.
 					// TODO: we're getting to this point twice for each link clicked. Figure out why.
+					$content = $(settings.contentSelector).first();
 				}
 				if (stateData.ajaxifyData.referrer !== prevUrl) {
 					// User has gone back
 					// TODO: Ajax load in this case
-					document.location.href = url;
-					return false;
+					// document.location.href = url;
+					// return false;
+					$content = $(settings.backContentSelector);
+					goingBack = true;
 				}
+			} else if (instanceId === 0) {
+				// This page wasn't loaded via AJAX. The first instance of ajaxify will handle the ajax load.
+
+				$content = $(settings.backContentSelector);
+				goingBack = true;
+				// document.location.href = url;
+				// return false;
 			} else {
-				// This page wasn't loaded via Ajax
-				document.location.href = url;
-				return false;
+				// This page wasn't loaded by AJAX. This is not the first instance of ajaxify, so return.
+				return;
 			}
 
 			// Set Loading
 			$body.addClass('ajaxify-loading');
 
-			// Page may have been changed since this instance of Ajaxify was first called, so update $content.
-			$content = $(settings.contentSelector).first(),
 			contentNode = $content.get(0);
 
 			if (settings.keepOldContent) {
