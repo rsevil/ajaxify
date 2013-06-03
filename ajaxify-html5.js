@@ -115,7 +115,6 @@
                         ajaxifyData : {
                             instance : instanceId,
                             referrer : unescape(document.location.toString())
-                            //TODO: Make the instance ID a hash of settings, so that it's less data but still consistent across page loads (as opposed to a random number, which is short but not consistent).
                         }
                     };
                 // Continue as normal for cmd clicks etc
@@ -158,9 +157,6 @@
 				}
 				if (stateData.ajaxifyData.referrer !== prevUrl) {
 					// User has gone back
-					// TODO: Ajax load in this case
-					// document.location.href = url;
-					// return false;
 					$content = $(settings.backContentSelector);
 					goingBack = true;
 				}
@@ -169,11 +165,9 @@
 
 				$content = $(settings.backContentSelector);
 				goingBack = true;
-				// document.location.href = url;
-				// return false;
 			} else {
 				// This page wasn't loaded by AJAX. This is not the first instance of ajaxify, so return.
-				return;
+				return false;
 			}
 
 			// Set Loading
