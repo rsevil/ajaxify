@@ -40,8 +40,16 @@ main,#main,#content,article:first,.article:first,.post:first
 Your content might actually be elsewhere. If so, just do something like this:
 
 ```javascript
-$('body').ajaxify({
+$.ajaxify({
     contentSelector : '#myAwesomeContent'
+});
+```
+
+By default, ajaxify works on all links in the page, but you can get more specific if you'd like:
+
+```javascript
+$.ajaxify({
+    linkSelector : '#myAjaxNavigation'
 });
 ```
 
@@ -54,7 +62,7 @@ $.ajaxify({
 });
 ```
 
-Now clicking links in the sidebar will AJAX load the content area, but clicking links in the content area will trigger a normal, non-AJAX page load.
+Now clicking links in the sidebar will AJAX load the content area, but clicking links in the content area will trigger a normal, non-AJAX page load. You can have as many calls to ajaxify as you'd like.
 
 ## To Do
 

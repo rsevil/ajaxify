@@ -29,7 +29,7 @@
 		var settings = $.extend( {
 			contentSelector : 'main,#main,#content,article:first,.article:first,.post:first',
 			backContentSelector : '#content,main,#main,article:first,.article:first,.post:first', // When the user goes back to a page, we can't just re-run the same animation that was used to show that page, because we might miss some content. Instead, we'll use a selector that's the same as the content selector or broader.
-			linkContainerSelector : '',
+			linkContainerSelector : 'body',
 			menuSelector : '#menu,#nav,nav:first,.nav:first',
 			activeClass : 'active selected current youarehere',
 			activeSelector : '.active,.selected,.current,.youarehere',
