@@ -3,14 +3,14 @@
 // https://github.com/prod4ever/ajaxify
 
 (function( $ ){
-	$.fn.ajaxify = function ( options ) {
+	$.ajaxify = function ( options ) {
 
 		// Prepare our Variables
 		var
 			History = window.History,
 			$ = window.jQuery,
 			document = window.document,
-			$ajaxifyTarget = this, // The element on which Ajaxify was called. Any links in this element will trigger an AJAX load.
+			$html = $('html'),
 			instanceId; // ID for this instance of ajaxify. Starts at 0 and increases each time ajaxify is run.
 
 		// Check to see if History.js is enabled for our Browser
@@ -18,12 +18,12 @@
 			return false;
 		}
 
-		if (typeof $.fn.ajaxify.instanceCount === 'undefined') {
-			$.fn.ajaxify.instanceCount = 0;
+		if (typeof $.ajaxify.instanceCount === 'undefined') {
+			$.ajaxify.instanceCount = 0;
 		} else {
-			$.fn.ajaxify.instanceCount++;
+			$.ajaxify.instanceCount++;
 		}
-		instanceId = $.fn.ajaxify.instanceCount;
+		instanceId = $.ajaxify.instanceCount;
 
 		// Settings
 		var settings = $.extend( {
@@ -107,7 +107,7 @@
 		function setupLinks($links){
 			var linkSelector = ' a:internal:not(.no-ajaxy)',
 				fullLinkSelector = settings.linkContainerSelector.replace(/\,/g, linkSelector + ',') + linkSelector;
-            $($ajaxifyTarget).on("click", fullLinkSelector, function(event) {
+            $html.on("click", fullLinkSelector, function(event) {
                 var
                     $links = $(this),
                     url = $links.attr('href'),

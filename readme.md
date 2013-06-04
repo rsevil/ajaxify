@@ -17,21 +17,17 @@ Ajaxify your entire website instantly with this simple drop-in script using the 
 <!-- Ajaxify -->
 <script src="//raw.github.com/browserstate/ajaxify/master/ajaxify-html5.js"></script>
 
-<!-- Tell Ajaxify what to look for -->
+<!-- Run Ajaxify -->
 <script>
 $(document).ready(function () {
-	$('body').ajaxify();	
+	$.ajaxify();	
 });
 </script>
 ```
 
 ## Usage
 
-The installation instructions above should get Ajaxify up and running. The last bit of JavaScript says that Ajaxify should be applied to all the links on your page. If you actually only want to ajaxify certain links, you can do that as well:
-
-``` javascript
-$('#ajaxNavigation').ajaxify();
-```
+The installation instructions above should get Ajaxify up and running. 
 
 ## Advanced Usage
 
@@ -52,7 +48,7 @@ $('body').ajaxify({
 You can get really fancy with this if you want. For example, you might want to set up Ajaxify so that when the user clicks a link in the sidebar, Ajaxify updates the content area but not the sidebar. To accomplish that, you could could do something like this:
 
 ``` javascript
-$('body').ajaxify({
+$.ajaxify({
     contentSelector : '#main',
     linkContainerSelector '#sidebar'
 });
