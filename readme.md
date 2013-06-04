@@ -53,16 +53,25 @@ $.ajaxify({
 });
 ```
 
-You can get really fancy with this if you want. For example, you might want to set up Ajaxify so that when the user clicks a link in the sidebar, Ajaxify updates the content area but not the sidebar. To accomplish that, you could could do something like this:
+You can get really fancy with this if you want. For example, you might want to set up Ajaxify as follows:
+
+* When the user clicks a link in the sidebar, Ajaxify updates the content area but not the sidebar.
+* When the user clicks a link in the content area, Ajaxify updates the whole page.
+
+You can do this by calling Ajaxify twice, with two sets of options:
 
 ``` javascript
 $.ajaxify({
     contentSelector : '#main',
     linkContainerSelector '#sidebar'
 });
+$.ajaxify({
+    contentSelector : 'body',
+    linkContainerSelector '#main'
+});
 ```
 
-Now clicking links in the sidebar will AJAX load the content area, but clicking links in the content area will trigger a normal, non-AJAX page load. You can have as many calls to ajaxify as you'd like.
+We're assuming here that #sidebar is outside of #main.
 
 ## To Do
 
