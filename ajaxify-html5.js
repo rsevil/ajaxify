@@ -34,15 +34,17 @@
 			activeClass : 'active selected current youarehere',
 			activeSelector : '.active,.selected,.current,.youarehere',
 			menuChildrenSelector : '> li,> ul > li',
+			startEventName : 'statechangestart',
 			completedEventName : 'statechangecomplete',
 			scrollOptions : {
 				duration: 800,
 				easing:'swing'
 			},
 			scrollEnabled : true,
-			startAnim : function($oldContent, $newContent, url) { // Callback to be fired before new content is loaded. This function typically hides the old content, but you could keep it onscreen if you want. If keepOldContent is false, newContent will be an empty jQuery object.
+			startAnim : function($oldContent, $newContent, url, startEventName) { // Callback to be fired before new content is loaded. This function typically hides the old content, but you could keep it onscreen if you want. If keepOldContent is false, newContent will be an empty jQuery object.
 				// Animating to opacity to 0 still keeps the element's height intact
 				// Which prevents that annoying pop bang issue when loading in new content
+				$(window).trigger(startEventName); // This trigger is in the callback so that you can choose when it happens (e.g., before or after an animation).
 				$oldContent.animate({opacity:0},800, function() {
 					$('body').addClass('ajaxify-waiting');
 					// This class indicates that the animation has completed and we are still waiting for data to load.
@@ -54,7 +56,7 @@
 				$newContent.css({ 'opacity' : 0, 'display' : 'block'}).animate({opacity:1},800, function () {
 					$('body').removeClass('ajaxify-waiting'); // In case endAnim fires before the startAnim is complete
 				});
-				$(window).trigger(completedEventName, data);
+				$(window).trigger(completedEventName, data); // This trigger is in the callback so that you can choose when it happens (e.g., before or after an animation).
 			}, 
 			keepOldContent : false // Should we keep the old content around so that endAnim can do stuff with it? If so, be sure to remove the old content in endAnim when you are done.
 		}, options);
@@ -180,9 +182,9 @@
 				$content
 					.wrapInner('<div id="ajaxify-oldContent" />')
 					.append('<div id="ajaxify-newContent" style="display: none;" />');
-				settings.startAnim($('#ajaxify-oldContent'), $('#ajaxify-newContent'), url);
+				settings.startAnim($('#ajaxify-oldContent'), $('#ajaxify-newContent'), url, settings.startEventName);
 			} else {
-				settings.startAnim($content, $(), url);
+				settings.startAnim($content, $(), url, settings.startEventName);
 			}
 
 			// Hide the existing content
