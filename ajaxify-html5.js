@@ -243,7 +243,7 @@
 							if ( !$script[0].async ) { scriptNode.async = false; }
 							scriptNode.src = $script.attr('src');
 						}
-    						scriptNode.appendChild(document.createTextNode(scriptText));
+    						$(scriptNode).html(scriptText); // using $.html rather than .innerHTML to work around IE8 funkiness.
 						contentNode.appendChild(scriptNode);
 					});
 
