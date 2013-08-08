@@ -119,9 +119,15 @@
                             instance : instanceId,
                             referrer : unescape(document.location.toString())
                         }
-                    };
+                    }
                 // Continue as normal for cmd clicks etc
                 if ( event.which == 2 || event.metaKey ) { return true; }
+                if ( url.indexOf('#') !== -1) {
+                	/* History.js doesn't fire a state change for links with hashes.
+                	See this bug: https://github.com/browserstate/history.js/issues/276
+                	Until that bug is fixed, let's just load the link without Ajax. */
+                	return true;
+                }
                 // Ajaxify this link
                 History.pushState(stateData,title,url);
                 event.preventDefault();
