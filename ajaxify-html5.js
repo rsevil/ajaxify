@@ -11,6 +11,7 @@
 			$ = window.jQuery,
 			document = window.document,
 			$html = $('html'),
+			me = this,
 			instanceId; // ID for this instance of ajaxify. Starts at 0 and increases each time ajaxify is run.
 
 		// Check to see if History.js is enabled for our Browser
@@ -41,28 +42,45 @@
 				easing:'swing'
 			},
 			scrollEnabled : true,
-			startAnim : function($oldContent, $newContent, url, startEventName) { // Callback to be fired before new content is loaded. This function typically hides the old content, but you could keep it onscreen if you want. If keepOldContent is false, newContent will be an empty jQuery object.
+			animationOut:{
+				animation: "bounceOutLeft", duration: 1, keep: true
+			},
+			animationIn:{
+				animation: "bounceInRight", duration: 1
+			},
+			startAnim : function($oldContent, $newContent, url, startEventName, loadContentFunc, opts) { // Callback to be fired before new content is loaded. This function typically hides the old content, but you could keep it onscreen if you want. If keepOldContent is false, newContent will be an empty jQuery object.
 				// Animating to opacity to 0 still keeps the element's height intact
 				// Which prevents that annoying pop bang issue when loading in new content
+				var f = function() { loadContentFunc(); };
+				// if (instance.supportsAnimations())
+					$oldContent.animo(opts.animationOut,f);
+				// else
+					// f();
+					
 				$(window).trigger(startEventName); // This trigger is in the callback so that you can choose when it happens (e.g., before or after an animation).
-				$oldContent.animate({opacity:0},800, function() {
-					$('body').addClass('ajaxify-waiting');
-					// This class indicates that the animation has completed and we are still waiting for data to load.
-				});
 			},
-			endAnim : function($oldContent, $newContent, url, completedEventName, data) { // Callback to be fired before new content is loaded. This function shows the new content. If keepOldContent is false, oldContent will be an empty jQuery object.
+			endAnim : function($oldContent, $newContent, url, completedEventName, data, opts) { // Callback to be fired before new content is loaded. This function shows the new content. If keepOldContent is false, oldContent will be an empty jQuery object.
 				$oldContent.remove();
-				$('body').removeClass('ajaxify-loading ajaxify-waiting');
-				$newContent.css({ 'opacity' : 0, 'display' : 'block'}).animate({opacity:1},800, function () {
-					$('body').removeClass('ajaxify-waiting'); // In case endAnim fires before the startAnim is complete
-				});
+				
+				var f = function(){ if (opts.keepOldContent) $newContent.children().first().unwrap(); };
+				// if (instance.supportsAnimations())
+					$newContent.animo(opts.animationIn, f);
+				// else
+					// f();
 				$(window).trigger(completedEventName, data); // This trigger is in the callback so that you can choose when it happens (e.g., before or after an animation).
+				
+				// $('body').removeClass('ajaxify-loading ajaxify-waiting');
+				// $newContent.css({ 'opacity' : 0, 'display' : 'block'}).animate({opacity:1},800, function () {
+					// $('body').removeClass('ajaxify-waiting'); // In case endAnim fires before the startAnim is complete
+				// });
 			}, 
-			keepOldContent : false // Should we keep the old content around so that endAnim can do stuff with it? If so, be sure to remove the old content in endAnim when you are done.
+			keepOldContent : true // Should we keep the old content around so that endAnim can do stuff with it? If so, be sure to remove the old content in endAnim when you are done.
 		}, options);
+		
 		if (settings.linkContainerSelector === '') {
 			settings.linkContainerSelector = settings.contentSelector;
 		}
+		
 		// Prepare internal variables
 		var $content = $(settings.contentSelector).first(),
 		contentNode = $content.get(0),
@@ -106,7 +124,7 @@
 		};
 
 		// Ajaxify Helper
-		function setupLinks($links){
+		this.setupLinks = function($links){
 			var linkSelector = ' a:internal:not(.no-ajaxy)',
 				fullLinkSelector = settings.linkContainerSelector.replace(/\,/g, linkSelector + ',') + linkSelector;
             $html.on("click", fullLinkSelector, function(event) {
@@ -138,7 +156,25 @@
 			return $links;
 		}
 
-		setupLinks($(settings.linkContainerSelector));
+		this.setupLinks($(settings.linkContainerSelector));
+		
+		this.supportsTransitions = function() {
+			var b = document.body || document.documentElement,
+				s = b.style,
+				p = 'transition';
+
+			if (typeof s[p] == 'string') { return true; }
+
+			// Tests for vendor specific prop
+			var v = ['Moz', 'webkit', 'Webkit', 'Khtml', 'O', 'ms'];
+			p = p.charAt(0).toUpperCase() + p.substr(1);
+
+			for (var i=0; i<v.length; i++) {
+				if (typeof s[v[i] + p] == 'string') { return true; }
+			}
+
+			return false;
+		}
 
 		// Hook into State Changes
 		$window.bind('statechange',function() {
@@ -183,105 +219,120 @@
 			$body.addClass('ajaxify-loading');
 
 			contentNode = $content.get(0);
-
-			if (settings.keepOldContent) {
-				$content
-					.wrapInner('<div id="ajaxify-oldContent" />')
-					.append('<div id="ajaxify-newContent" style="display: none;" />');
-				settings.startAnim($('#ajaxify-oldContent'), $('#ajaxify-newContent'), url, settings.startEventName);
-			} else {
-				settings.startAnim($content, $(), url, settings.startEventName);
-			}
-
-			// Hide the existing content
 			
+			var loadContent = function(){
+				// Ajax Request the Traditional Page
+				$.ajax({
+					url: url,
+					success: function(data, textStatus, jqXHR){
+						// Prepare
+						var
+							$data = $(documentHtml(data)),
+							$dataBody = $data.find('.document-body:first'),
+							$dataContent = $dataBody.find(settings.contentSelector).filter(':first'),
+							$menuChildren, contentHtml, $scripts;
 
-			// Ajax Request the Traditional Page
-			$.ajax({
-				url: url,
-				success: function(data, textStatus, jqXHR){
-					// Prepare
-					var
-						$data = $(documentHtml(data)),
-						$dataBody = $data.find('.document-body:first'),
-						$dataContent = $dataBody.find(settings.contentSelector).filter(':first'),
-						$menuChildren, contentHtml, $scripts;
+						// Fetch the scripts
+						$scripts = $dataContent.find('script');
+						if ( $scripts.length ) {
+							$scripts.detach();
+						}
 
-					// Fetch the scripts
-					$scripts = $dataContent.find('script');
-					if ( $scripts.length ) {
-						$scripts.detach();
-					}
+						// Fetch the content
+						contentHtml = $dataContent.html();
+						if ( !contentHtml ) {
+							document.location.href = url;
+							return false;
+						}
 
-					// Fetch the content
-					contentHtml = $dataContent.html();
-					if ( !contentHtml ) {
+						// Update the menu
+						$menuChildren = $menu.find(settings.menuChildrenSelector);
+						$menuChildren.filter(settings.activeSelector).removeClass(settings.activeClass);
+						$menuChildren = $menuChildren.has('a[href^="'+relativeUrl+'"],a[href^="/'+relativeUrl+'"],a[href^="'+url+'"]');
+						if ( $menuChildren.length === 1 ) { $menuChildren.addClass(settings.activeClass); }
+
+						// Update the content
+						$content.stop(true,true);
+
+						if (settings.keepOldContent) {
+							$('#ajaxify-newContent').html(contentHtml);
+						} else {
+							$content.html(contentHtml);
+						}
+
+						// Update the title
+						document.title = $data.find('.document-title:first').text();
+						try {
+							document.getElementsByTagName('title')[0].innerHTML = document.title.replace('<','&lt;').replace('>','&gt;').replace(' & ',' &amp; ');
+						}
+						catch ( Exception ) { }
+
+						// Add the scripts
+						$scripts.each(function(){
+							var $script = $(this), scriptText = $script.text(), scriptNode = document.createElement('script');
+							if ( $script.attr('src') ) {
+								if ( !$script[0].async ) { scriptNode.async = false; }
+								scriptNode.src = $script.attr('src');
+							}
+								$(scriptNode).html(scriptText); // using $.html rather than .innerHTML to work around IE8 funkiness.
+							contentNode.appendChild(scriptNode);
+						});
+
+						// Complete the change
+						if ( ( $body.ScrollTo||false ) && settings.scrollEnabled ) { 
+							$body.ScrollTo(settings.scrollOptions); /* http://balupton.com/projects/jquery-scrollto */
+						}
+
+						// Inform Google Analytics of the change
+						if ( typeof window._gaq !== 'undefined' ) {
+							window._gaq.push(['_trackPageview', relativeUrl]);
+						}
+
+						// Inform ReInvigorate of a state change
+						if ( typeof window.reinvigorate !== 'undefined' && typeof window.reinvigorate.ajax_track !== 'undefined' ) {
+							reinvigorate.ajax_track(url);
+							// ^ we use the full url here as that is what reinvigorate supports
+						}
+						
+						settings.endAnim(
+							settings.keepOldContent
+								? $('#ajaxify-oldContent')
+								: $(), 
+							settings.keepOldContent
+								? $('#ajaxify-newContent')
+								: $content, 
+							url, 
+							settings.completedEventName, 
+							data, 
+							settings
+						);
+						
+					},
+					error: function(jqXHR, textStatus, errorThrown){
 						document.location.href = url;
 						return false;
 					}
-
-					// Update the menu
-					$menuChildren = $menu.find(settings.menuChildrenSelector);
-					$menuChildren.filter(settings.activeSelector).removeClass(settings.activeClass);
-					$menuChildren = $menuChildren.has('a[href^="'+relativeUrl+'"],a[href^="/'+relativeUrl+'"],a[href^="'+url+'"]');
-					if ( $menuChildren.length === 1 ) { $menuChildren.addClass(settings.activeClass); }
-
-					// Update the content
-					$content.stop(true,true);
-
-					if (settings.keepOldContent) {
-						$('#ajaxify-newContent').html(contentHtml);
-					} else {
-						$content.html(contentHtml);
-					}
-
-					// Update the title
-					document.title = $data.find('.document-title:first').text();
-					try {
-						document.getElementsByTagName('title')[0].innerHTML = document.title.replace('<','&lt;').replace('>','&gt;').replace(' & ',' &amp; ');
-					}
-					catch ( Exception ) { }
-
-					// Add the scripts
-					$scripts.each(function(){
-						var $script = $(this), scriptText = $script.text(), scriptNode = document.createElement('script');
-						if ( $script.attr('src') ) {
-							if ( !$script[0].async ) { scriptNode.async = false; }
-							scriptNode.src = $script.attr('src');
-						}
-    						$(scriptNode).html(scriptText); // using $.html rather than .innerHTML to work around IE8 funkiness.
-						contentNode.appendChild(scriptNode);
-					});
-
-					// Complete the change
-					if ( ( $body.ScrollTo||false ) && settings.scrollEnabled ) { 
-						$body.ScrollTo(settings.scrollOptions); /* http://balupton.com/projects/jquery-scrollto */
-					}
-
-					// Inform Google Analytics of the change
-					if ( typeof window._gaq !== 'undefined' ) {
-						window._gaq.push(['_trackPageview', relativeUrl]);
-					}
-
-					// Inform ReInvigorate of a state change
-					if ( typeof window.reinvigorate !== 'undefined' && typeof window.reinvigorate.ajax_track !== 'undefined' ) {
-						reinvigorate.ajax_track(url);
-						// ^ we use the full url here as that is what reinvigorate supports
-					}
-
-					if (settings.keepOldContent) {
-						settings.endAnim($('#ajaxify-oldContent'), $('#ajaxify-newContent'), url, settings.completedEventName, data);
-					} else {
-						settings.endAnim($(), $content, url, settings.completedEventName, data);
-					}
-					
-				},
-				error: function(jqXHR, textStatus, errorThrown){
-					document.location.href = url;
-					return false;
-				}
-			}); // end ajax
-
+				}); // end ajax
+			}
+			
+			if (settings.keepOldContent)
+				$content
+					.wrapInner('<div id="ajaxify-oldContent" />')
+					.append('<div id="ajaxify-newContent" />');
+			
+			settings.startAnim(
+				settings.keepOldContent
+					? $('#ajaxify-oldContent')
+					: $content, 
+				settings.keepOldContent
+					? $('#ajaxify-newContent')
+					: $(), 
+				url, 
+				settings.startEventName,
+				loadContent,
+				settings
+			);
+			
 		}); // end statechange
 	}; // end $.fn.ajaxify
 })( jQuery ); // end closure
