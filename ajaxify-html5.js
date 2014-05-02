@@ -3,6 +3,24 @@
 // https://github.com/prod4ever/ajaxify
 
 (function( $ ){
+	var supportsAnimations = function() {
+		var b = document.body || document.documentElement,
+			s = b.style,
+			p = 'animation';
+
+		if (typeof s[p] == 'string') { return true; }
+
+		// Tests for vendor specific prop
+		var v = ['Moz', 'webkit', 'Webkit', 'Khtml', 'O', 'ms'];
+		p = p.charAt(0).toUpperCase() + p.substr(1);
+
+		for (var i=0; i<v.length; i++) {
+			if (typeof s[v[i] + p] == 'string') { return true; }
+		}
+
+		return false;
+	};
+
 	$.ajaxify = function ( options ) {
 
 		// Prepare our Variables
@@ -11,7 +29,6 @@
 			$ = window.jQuery,
 			document = window.document,
 			$html = $('html'),
-			me = this,
 			instanceId; // ID for this instance of ajaxify. Starts at 0 and increases each time ajaxify is run.
 
 		// Check to see if History.js is enabled for our Browser
@@ -52,10 +69,10 @@
 				// Animating to opacity to 0 still keeps the element's height intact
 				// Which prevents that annoying pop bang issue when loading in new content
 				var f = function() { loadContentFunc(); };
-				// if (instance.supportsAnimations())
+				if (supportsAnimations())
 					$oldContent.animo(opts.animationOut,f);
-				// else
-					// f();
+				else
+					$oldContent.animate({opacity:0},800, f);
 					
 				$(window).trigger(startEventName); // This trigger is in the callback so that you can choose when it happens (e.g., before or after an animation).
 			},
@@ -63,10 +80,13 @@
 				$oldContent.remove();
 				
 				var f = function(){ if (opts.keepOldContent) $newContent.children().first().unwrap(); };
-				// if (instance.supportsAnimations())
+				if (supportsAnimations())
 					$newContent.animo(opts.animationIn, f);
-				// else
-					// f();
+				else
+					$newContent
+						.css({ 'opacity' : 0, 'display' : 'block'})
+						.animate({opacity:1},800, f);
+						
 				$(window).trigger(completedEventName, data); // This trigger is in the callback so that you can choose when it happens (e.g., before or after an animation).
 				
 				// $('body').removeClass('ajaxify-loading ajaxify-waiting');
@@ -124,7 +144,7 @@
 		};
 
 		// Ajaxify Helper
-		this.setupLinks = function($links){
+		function setupLinks($links){
 			var linkSelector = ' a:internal:not(.no-ajaxy)',
 				fullLinkSelector = settings.linkContainerSelector.replace(/\,/g, linkSelector + ',') + linkSelector;
             $html.on("click", fullLinkSelector, function(event) {
@@ -156,29 +176,10 @@
 			return $links;
 		}
 
-		this.setupLinks($(settings.linkContainerSelector));
-		
-		this.supportsTransitions = function() {
-			var b = document.body || document.documentElement,
-				s = b.style,
-				p = 'transition';
-
-			if (typeof s[p] == 'string') { return true; }
-
-			// Tests for vendor specific prop
-			var v = ['Moz', 'webkit', 'Webkit', 'Khtml', 'O', 'ms'];
-			p = p.charAt(0).toUpperCase() + p.substr(1);
-
-			for (var i=0; i<v.length; i++) {
-				if (typeof s[v[i] + p] == 'string') { return true; }
-			}
-
-			return false;
-		}
+		setupLinks($(settings.linkContainerSelector));
 
 		// Hook into State Changes
 		$window.bind('statechange',function() {
-
 			// Prepare Variables
 			var State = History.getState(),
 				savedStates = History.savedStates,
