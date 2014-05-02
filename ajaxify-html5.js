@@ -88,11 +88,6 @@
 						.animate({opacity:1},800, f);
 						
 				$(window).trigger(completedEventName, data); // This trigger is in the callback so that you can choose when it happens (e.g., before or after an animation).
-				
-				// $('body').removeClass('ajaxify-loading ajaxify-waiting');
-				// $newContent.css({ 'opacity' : 0, 'display' : 'block'}).animate({opacity:1},800, function () {
-					// $('body').removeClass('ajaxify-waiting'); // In case endAnim fires before the startAnim is complete
-				// });
 			}, 
 			keepOldContent : true // Should we keep the old content around so that endAnim can do stuff with it? If so, be sure to remove the old content in endAnim when you are done.
 		}, options);
