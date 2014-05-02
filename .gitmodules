@@ -1,0 +1,6 @@
+[submodule "externals/animo.js"]
+	path = externals/animo.js
+	url = https://github.com/ThrivingKings/animo.js
+[submodule "externals/history.js"]
+	path = externals/history.js
+	url = https://github.com/browserstate/history.js.git
