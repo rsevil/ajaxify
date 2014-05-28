@@ -60,10 +60,10 @@
 			},
 			scrollEnabled : true,
 			animationOut:{
-				animation: "bounceOutLeft", duration: 1, keep: true
+				animation: "fadeOut", duration: 0.3, keep: true
 			},
 			animationIn:{
-				animation: "bounceInRight", duration: 1
+				animation: "fadeIn", duration: 0.3
 			},
 			startAnim : function($oldContent, $newContent, url, startEventName, loadContentFunc, opts) { // Callback to be fired before new content is loaded. This function typically hides the old content, but you could keep it onscreen if you want. If keepOldContent is false, newContent will be an empty jQuery object.
 				// Animating to opacity to 0 still keeps the element's height intact
@@ -89,7 +89,7 @@
 						
 				$(window).trigger(completedEventName, data); // This trigger is in the callback so that you can choose when it happens (e.g., before or after an animation).
 			}, 
-			keepOldContent : true // Should we keep the old content around so that endAnim can do stuff with it? If so, be sure to remove the old content in endAnim when you are done.
+			keepOldContent : false // Should we keep the old content around so that endAnim can do stuff with it? If so, be sure to remove the old content in endAnim when you are done.
 		}, options);
 		
 		if (settings.linkContainerSelector === '') {
@@ -229,7 +229,11 @@
 							$menuChildren, contentHtml, $scripts;
 
 						// Fetch the scripts
-						$scripts = $dataContent.find('script');
+						$scripts = $dataContent
+									.find('script')
+									.add(
+										$($dataBody).find('script[data-ajaxy]')
+									);
 						if ( $scripts.length ) {
 							$scripts.detach();
 						}
